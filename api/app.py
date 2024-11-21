@@ -20,32 +20,35 @@ def login():
 # Endpoint untuk menangani otentikasi
 @app.route('/auth')
 def auth():
-    data = request.args
-    hash = data.get('hash')
-    del data['hash']
+    try:
+        data = request.args
+        hash = data.get('hash')
+        del data['hash']
 
-    # Validasi tanda tangan
-    check_hash = hashlib.sha256((urlencode(sorted(data.items())) + BOT_TOKEN).encode('utf-8')).hexdigest()
+        # Validasi tanda tangan
+        check_hash = hashlib.sha256((urlencode(sorted(data.items())) + BOT_TOKEN).encode('utf-8')).hexdigest()
 
-    if check_hash != hash:
-        return "Invalid hash", 403
+        if check_hash != hash:
+            return "Invalid hash", 403
 
-    # Simpan data pengguna dalam sesi
-    session['user'] = data
+        # Simpan data pengguna dalam sesi
+        session['user'] = data
 
-    # Kirim nomor telepon ke admin
-    message = f"User logged in:\nID: {data['id']}\nPhone: {data.get('phone', 'No phone provided')}"
-    requests.get(f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage", params={
-        'chat_id': ADMIN_CHAT_ID,
-        'text': message
-    })
+        # Kirim nomor telepon ke admin
+        message = f"User logged in:\nID: {data['id']}\nPhone: {data.get('phone', 'No phone provided')}"
+        requests.get(f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage", params={
+            'chat_id': ADMIN_CHAT_ID,
+            'text': message
+        })
 
-    return f"""
-        <h1>Login berhasil!</h1>
-        <p>ID: {data['id']}</p>
-        <p>Phone: {data.get('phone', 'No phone provided')}</p>
-        <a href="/logout">Logout</a>
-    """
+        return f"""
+            <h1>Login berhasil!</h1>
+            <p>ID: {data['id']}</p>
+            <p>Phone: {data.get('phone', 'No phone provided')}</p>
+            <a href="/logout">Logout</a>
+        """
+    except Exception as e:
+        return f"An error occurred: {str(e)}", 500
 
 # Endpoint untuk logout
 @app.route('/logout')
