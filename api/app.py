@@ -15,7 +15,7 @@ BOT_USERNAME = 'verifikasimemberindoviralbot'  # Ganti dengan username bot Anda 
 # Halaman login
 @app.route('/')
 def login():
-    return render_template('login.html', bot_username=BOT_USERNAME)
+    return render_template('templates/login.html', bot_username=BOT_USERNAME)
 
 # Endpoint untuk menangani otentikasi
 @app.route('/auth')
